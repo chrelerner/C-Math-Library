@@ -1,0 +1,328 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+
+struct matrix {
+    int row_count;
+    int col_count;
+    double **contents;
+};
+
+void free_matrix (struct matrix *target) {
+    for (int i = 0; i < target->row_count; i++) {
+        free(target->contents[i]);
+    }
+    free(target->contents);
+    free(target);
+}
+
+struct matrix *create_matrix (int row_count, int col_count, double *contents, int element_count) {
+
+    // Checks if dimensions are acceptable
+    if (!(row_count > 0 && col_count > 0)) {
+        printf("Dimensions unacceptable\n");
+        return NULL;
+    }
+
+    // Checks if the size of contents is acceptable
+    if (element_count != (row_count * col_count)) {
+        printf("Size of contents unacceptable\n");
+        return NULL;
+    }
+
+    // Defining the matrix
+    struct matrix *result = malloc(sizeof(struct matrix));
+    if (result == NULL) { // malloc error
+        printf("Malloc failure\n");
+        return NULL;
+    }
+    result->row_count = row_count;
+    result->col_count = col_count;
+
+    double **result_contents = malloc(sizeof(double*) * row_count);
+    if (result_contents == NULL) { // malloc error
+        free_matrix(result);
+        printf("Malloc failure\n");
+        return NULL;
+    }
+    result->contents = result_contents;
+
+    // Preparing contents
+    for (int i = 0; i < row_count; i++) {
+        result->contents[i] = malloc(sizeof(double) * col_count);
+        if (result->contents[i] == NULL) { // malloc error
+            free_matrix(result);
+            printf("Malloc failure\n");
+            return NULL;
+        }
+    }
+
+    // Filling in contents and returning successfully
+    for (int i = 0; i < row_count; i++) {
+        for (int j = 0; j < col_count; j++) {
+            int correct_index = j;
+            correct_index += i * col_count;
+            result->contents[i][j] = contents[correct_index];
+        }
+    }
+    return result;
+}
+
+struct matrix *change_matrix_dimensions (struct matrix *target, int new_row_count, int new_col_count) {
+
+    // Check if dimensions are acceptable
+    int old_row_count = target->row_count;
+    int old_col_count = target->col_count;
+
+    if (old_row_count * old_col_count != new_row_count * new_col_count) {
+        return NULL;
+    }
+
+    // Creating one dimensional array for the contents
+    int size = target->row_count * target->col_count;
+    double contents[size];
+
+    for (int i = 0; i < target->row_count; i++) {
+        for (int j = 0; j < target->col_count; j++) {
+            contents[j + (i * target->col_count)] = target->contents[i][j];
+        }
+    }
+
+    return create_matrix(new_row_count, new_col_count, contents, size);
+}
+
+struct matrix *matrix_addition (struct matrix *target1, struct matrix *target2) {
+
+    // Checks that dimensions are acceptable
+    int row1 = target1->row_count;
+    int col1 = target1->col_count;
+    int row2 = target2->row_count;
+    int col2 = target2->col_count;
+
+    if (row1 != row2 || col1 != col2) {
+        return NULL;
+    }
+
+    // Defining result matrix and dimensions
+    struct matrix *result = malloc(sizeof(struct matrix));
+    if (result == NULL) {
+        return NULL;
+    }
+    int row_count = target1->row_count;
+    int col_count = target1->col_count;
+    result->row_count = row_count;
+    result->col_count = col_count;
+
+    double **result_contents = malloc(sizeof(double*) * row_count);
+    if (result_contents == 0) { // malloc error
+        free_matrix(result);
+        return NULL;
+    }
+    result->contents = result_contents;
+
+    // Preparing contents
+    for (int i = 0; i < row_count; i++) {
+        result->contents[i] = malloc(sizeof(double) * col_count);
+        if ((result->contents[i]) == 0) { // malloc error
+            free(result);
+            return NULL;
+        }
+    }
+
+    // Performing addition and returning successfully
+    for (int i = 0; i < row_count; i++) {
+        for (int j = 0; j < col_count; j++) {
+            result->contents[i][j] = target1->contents[i][j] + target2->contents[i][j];
+        }
+    }
+    return result;
+}
+
+struct matrix *matrix_multiplication (struct matrix *target1, struct matrix *target2) {
+
+    // Checks that dimensions are acceptable
+    int row1 = target1->row_count;
+    int col1 = target1->col_count;
+    int row2 = target2->row_count;
+    int col2 = target2->col_count;
+
+    if (col1 != row2) {
+        return NULL;
+    }
+
+    // Defining result matrix and dimensions
+    struct matrix *result = malloc(sizeof(struct matrix));
+    if (result == NULL) {
+        return NULL;
+    }
+    int row_count = target1->row_count;
+    int col_count = target2->col_count;
+    result->row_count = row_count;
+    result->col_count = col_count;
+
+    double **result_contents = malloc(sizeof(double*) * row_count);
+    if (result_contents == 0) { // malloc error
+        return NULL;
+    }
+    result->contents = result_contents;
+
+    // Preparing contents
+    for (int i = 0; i < row_count; i++) {
+        result->contents[i] = malloc(sizeof(double) * col_count);
+        if ((result->contents[i]) == 0) { // malloc error
+            return NULL;
+        }
+    }
+
+    // Performing matrix multiplication and returning successfully
+    for (int a = 0; a < target1->row_count; a++) { // Row vector
+        for (int b = 0; b < target2->col_count; b++) { // Column vector
+
+            // Takes care of vector multiplication
+            double sum = 0;
+            for (int c = 0; c < target1->col_count; c++) {
+                sum += target1->contents[a][c] * target2->contents[c][b];
+            }
+            result->contents[a][b] = sum;
+        }
+    }
+    return result;
+}
+
+char *matrix_to_string (struct matrix *target) {
+    // Converts all elements to strings
+    int size = target->row_count * target->col_count;
+    char *contents_to_strings[size]; // Contains all the string variants of the elements
+
+    int max_string_size = 0;
+    for (int i = 0; i < target->row_count; i++) {
+        for (int j = 0; j < target->col_count; j++) {
+            int correct_index = j;
+            correct_index += i * target->col_count;
+            
+            // Allocates space for string, and inserts a string version of the double
+            contents_to_strings[correct_index] = malloc(sizeof(double) * 100);
+            sprintf(contents_to_strings[correct_index], "%f", target->contents[i][j]);
+
+            int str_len = strlen(contents_to_strings[correct_index]);
+            if (str_len > max_string_size) {
+                max_string_size = str_len;
+            }
+        }
+    }
+    int new_string_size = max_string_size + 2; // atleast two whitespaces before nullbyte
+
+    // Makes all of those strings equal in length
+    for (int i = 0; i < size; i++) {
+        char *old_string = contents_to_strings[i];
+
+        // Prepares adequate space for updated string
+        char *new_string = malloc(sizeof(double) * new_string_size);
+        new_string = strdup(old_string);
+
+        // Fills in whitespace and final nullbyte
+        bool nullbyte_reached = false;
+        for (int j = 0; j <= new_string_size; j++) {
+            if (!nullbyte_reached && new_string[j] == '\0' && (j < new_string_size)) {
+                nullbyte_reached = true;
+            }
+            if (nullbyte_reached && (j < new_string_size)) {
+                new_string[j] = ' ';
+            }
+            else if (j == new_string_size) {
+                new_string[j] = '\0';
+            }
+        }
+        // Updates the string directly and frees the old string
+        contents_to_strings[i] = new_string;
+        free(old_string);
+    }
+
+    // Inserts all of the strings into one huge string
+    int result_size = target->row_count * target->col_count * new_string_size;
+    result_size += target->row_count * 3 + 1; // | \n and \0
+    char *result = malloc(sizeof(char) * result_size);
+
+    result[result_size - 1] = '\0';
+
+    for (int i = 0; i < target->row_count; i++) {
+        for (int j = 0; j < target->col_count; j++) {
+            // Index for contents_to_strings
+            int correct_index1 = j + (i * target->col_count);
+
+            // Index for result
+            int correct_index2 = j * new_string_size + 1; // starts at 1, considers entire elements 
+            correct_index2 += i * (target->col_count * new_string_size); // row offset considering entire elements
+            correct_index2 += i * 3; // row offset considering brackets and newlines
+
+            // Inserts the string
+            char *string_to_insert = contents_to_strings[correct_index1];
+            for (int k = 0; k < new_string_size; k++) {
+                result[k + correct_index2] = string_to_insert[k]; 
+            }
+        }
+
+        // Inserts brackets
+        int bracket_index1 = i * (target->col_count * new_string_size); // row offset considering entire elements
+        bracket_index1 += i * 3; // row offset considering brackets and newlines
+        int bracket_index2 = bracket_index1 + (target->col_count * new_string_size) + 1;
+        result[bracket_index1] = '|';
+        result[bracket_index2] = '|';
+
+        // Inserts newlines
+        int newline_index = i * (target->col_count * new_string_size); // row offset considering entire elements
+        newline_index += i * 3; // row offset considering brackets and newlines
+        newline_index += (target->col_count * new_string_size) + 2;
+        result[newline_index] = '\n';
+    }
+    return result;
+}
+
+bool compare_matrices (struct matrix *target1, struct matrix *target2) {
+    // Compares dimensions
+    int row1 = target1->row_count;
+    int col1 = target1->col_count;
+    int row2 = target2->row_count;
+    int col2 = target2->col_count;
+
+    if (row1 != row2 || col1 != col2) {
+        return false;
+    }
+
+    // Compares elements
+    for (int i = 0; i < row1; i++) {
+        for (int j = 0; j < col1; j++) {
+            double element1 = target1->contents[i][j];
+            double element2 = target2->contents[i][j];
+            double difference = element1 - element2;
+            
+            char str_difference[10];
+            sprintf(str_difference, "%f", difference);
+            char str_zero[] = "0.000000";
+            bool equal_check = true;
+
+            if (str_difference[0] == '-') {
+                for (int i = 1; i < 9; i++) {
+                    if (str_difference[i] != str_zero[i - 1]) {
+                        equal_check = false;
+                    }
+                }
+            }
+            else {
+                for (int i = 0; i < 8; i++) {
+                    if (str_difference[i] != str_zero[i]) {
+                        equal_check = false;
+                    }
+                }
+            }
+
+            if (!equal_check) {
+                printf("\n%lf\n", difference);
+                printf("target1: element %lf --- target2: element %lf\n\n", target1->contents[i][j], target2->contents[i][j]);
+                return false;
+            }
+        }
+    }
+    return true;
+}
