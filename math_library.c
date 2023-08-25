@@ -10,6 +10,10 @@ struct matrix {
 };
 
 void free_matrix (struct matrix *target) {
+    if (target == NULL) {
+        return;
+    }
+    
     for (int i = 0; i < target->row_count; i++) {
         free(target->contents[i]);
     }
@@ -21,18 +25,18 @@ struct matrix *create_matrix (int row_count, int col_count, double *contents, in
 
     // Checks if dimensions are acceptable
     if (!(row_count > 0 && col_count > 0)) {
-        printf("Dimensions unacceptable\n");
+        printf("Dimensions %d %d unacceptable\n", row_count, col_count);
         return NULL;
     }
 
     // Checks if the size of contents is acceptable
     if (element_count != (row_count * col_count)) {
-        printf("Size of contents unacceptable\n");
+        printf("Size of contents %d unacceptable with dimensions %d %d\n", element_count, row_count, col_count);
         return NULL;
     }
 
     // Defining the matrix
-    struct matrix *result = malloc(sizeof(struct matrix));
+    struct matrix *result = (struct matrix *) malloc(sizeof(struct matrix));
     if (result == NULL) { // malloc error
         printf("Malloc failure\n");
         return NULL;
@@ -40,22 +44,31 @@ struct matrix *create_matrix (int row_count, int col_count, double *contents, in
     result->row_count = row_count;
     result->col_count = col_count;
 
-    double **result_contents = malloc(sizeof(double*) * row_count);
+    double **result_contents = (double **) malloc(sizeof(double *) * row_count);
     if (result_contents == NULL) { // malloc error
-        free_matrix(result);
+        free(result);
         printf("Malloc failure\n");
         return NULL;
     }
     result->contents = result_contents;
 
     // Preparing contents
+    bool malloc_fail = false;
     for (int i = 0; i < row_count; i++) {
-        result->contents[i] = malloc(sizeof(double) * col_count);
-        if (result->contents[i] == NULL) { // malloc error
-            free_matrix(result);
-            printf("Malloc failure\n");
-            return NULL;
+        if (!malloc_fail) {
+            result->contents[i] = (double *) malloc(sizeof(double) * col_count);
+            if (result->contents[i] == NULL) {
+                malloc_fail = true;
+            }
         }
+        else {
+            result->contents[i] = NULL;
+        }
+    }
+    if (malloc_fail) {
+        free_matrix(result);
+        printf("Malloc failure\n");
+        return NULL;
     }
 
     // Filling in contents and returning successfully
@@ -89,6 +102,7 @@ struct matrix *change_matrix_dimensions (struct matrix *target, int new_row_coun
         }
     }
 
+    // Returns NULL if failure
     return create_matrix(new_row_count, new_col_count, contents, size);
 }
 
@@ -105,7 +119,7 @@ struct matrix *matrix_addition (struct matrix *target1, struct matrix *target2) 
     }
 
     // Defining result matrix and dimensions
-    struct matrix *result = malloc(sizeof(struct matrix));
+    struct matrix *result = (struct matrix *) malloc(sizeof(struct matrix));
     if (result == NULL) {
         return NULL;
     }
@@ -114,20 +128,30 @@ struct matrix *matrix_addition (struct matrix *target1, struct matrix *target2) 
     result->row_count = row_count;
     result->col_count = col_count;
 
-    double **result_contents = malloc(sizeof(double*) * row_count);
-    if (result_contents == 0) { // malloc error
-        free_matrix(result);
+    double **result_contents = (double **) malloc(sizeof(double *) * row_count);
+    if (result_contents == NULL) { // malloc error
+        free(result);
         return NULL;
     }
     result->contents = result_contents;
 
     // Preparing contents
+    bool malloc_fail = false;
     for (int i = 0; i < row_count; i++) {
-        result->contents[i] = malloc(sizeof(double) * col_count);
-        if ((result->contents[i]) == 0) { // malloc error
-            free(result);
-            return NULL;
+        if (!malloc_fail) {
+            result->contents[i] = (double *) malloc(sizeof(double) * col_count);
+            if (result->contents[i] == NULL) {
+                malloc_fail = true;
+            }
         }
+        else {
+            result->contents[i] = NULL;
+        }
+    }
+    if (malloc_fail) {
+        free_matrix(result);
+        printf("Malloc failure\n");
+        return NULL;
     }
 
     // Performing addition and returning successfully
@@ -152,7 +176,7 @@ struct matrix *matrix_multiplication (struct matrix *target1, struct matrix *tar
     }
 
     // Defining result matrix and dimensions
-    struct matrix *result = malloc(sizeof(struct matrix));
+    struct matrix *result = (struct matrix *) malloc(sizeof(struct matrix));
     if (result == NULL) {
         return NULL;
     }
@@ -161,18 +185,30 @@ struct matrix *matrix_multiplication (struct matrix *target1, struct matrix *tar
     result->row_count = row_count;
     result->col_count = col_count;
 
-    double **result_contents = malloc(sizeof(double*) * row_count);
+    double **result_contents = (double **) malloc(sizeof(double *) * row_count);
     if (result_contents == 0) { // malloc error
+        free(result);
         return NULL;
     }
     result->contents = result_contents;
 
     // Preparing contents
+    bool malloc_fail = false;
     for (int i = 0; i < row_count; i++) {
-        result->contents[i] = malloc(sizeof(double) * col_count);
-        if ((result->contents[i]) == 0) { // malloc error
-            return NULL;
+        if (!malloc_fail) {
+            result->contents[i] = (double *) malloc(sizeof(double) * col_count);
+            if (result->contents[i] == NULL) {
+                malloc_fail = true;
+            }
         }
+        else {
+            result->contents[i] = NULL;
+        }
+    }
+    if (malloc_fail) {
+        free_matrix(result);
+        printf("Malloc failure\n");
+        return NULL;
     }
 
     // Performing matrix multiplication and returning successfully
@@ -195,54 +231,87 @@ char *matrix_to_string (struct matrix *target) {
     int size = target->row_count * target->col_count;
     char *contents_to_strings[size]; // Contains all the string variants of the elements
 
-    int max_string_size = 0;
+    bool malloc_fail = false;
+    int max_string_size = 0; // excluding nullbyte
     for (int i = 0; i < target->row_count; i++) {
         for (int j = 0; j < target->col_count; j++) {
             int correct_index = j;
             correct_index += i * target->col_count;
             
-            // Allocates space for string, and inserts a string version of the double
-            contents_to_strings[correct_index] = malloc(sizeof(double) * 100);
-            sprintf(contents_to_strings[correct_index], "%f", target->contents[i][j]);
-
-            int str_len = strlen(contents_to_strings[correct_index]);
-            if (str_len > max_string_size) {
-                max_string_size = str_len;
+            if (!malloc_fail) {
+                // Allocates space for string, and inserts a string version of the double
+                contents_to_strings[correct_index] = (char *) malloc(sizeof(char) * 100);
+                if (contents_to_strings[correct_index] == NULL) {
+                    malloc_fail = true;
+                }
+                else {
+                    int str_len = sprintf(contents_to_strings[correct_index], "%0.3f", target->contents[i][j]);
+                    if (str_len > max_string_size) {
+                        max_string_size = str_len;
+                    }
+                }
+            }
+            else {
+                contents_to_strings[correct_index] = NULL;
             }
         }
     }
-    int new_string_size = max_string_size + 2; // atleast two whitespaces before nullbyte
+    if (malloc_fail) {
+        for (int i = 0; i < size; i++) {
+            free(contents_to_strings[i]);
+        }
+        return NULL;
+    }
 
     // Makes all of those strings equal in length
+    int new_string_size = max_string_size + 2; // add 2 whitespaces before the nullbyte
+
     for (int i = 0; i < size; i++) {
         char *old_string = contents_to_strings[i];
 
-        // Prepares adequate space for updated string
-        char *new_string = malloc(sizeof(double) * new_string_size);
-        new_string = strdup(old_string);
+        if (!malloc_fail) {
+            // Prepares adequate space for updated string
+            char *new_string = (char *) malloc(sizeof(char) * (new_string_size + 1));
+            if (new_string == NULL) {
+                malloc_fail = true;
+            }
+            else {
+                new_string = strcpy(new_string, old_string);
 
-        // Fills in whitespace and final nullbyte
-        bool nullbyte_reached = false;
-        for (int j = 0; j <= new_string_size; j++) {
-            if (!nullbyte_reached && new_string[j] == '\0' && (j < new_string_size)) {
-                nullbyte_reached = true;
+                // Fills in whitespace and final nullbyte
+                bool nullbyte_reached = false;
+                for (int j = 0; j <= new_string_size; j++) {
+                    if (!nullbyte_reached && new_string[j] == '\0' && (j < new_string_size)) {
+                        nullbyte_reached = true;
+                    }
+                    if (nullbyte_reached && (j < new_string_size)) {
+                        new_string[j] = ' ';
+                    }
+                    else if (j == new_string_size) {
+                        new_string[j] = '\0';
+                    }
+                }
             }
-            if (nullbyte_reached && (j < new_string_size)) {
-                new_string[j] = ' ';
-            }
-            else if (j == new_string_size) {
-                new_string[j] = '\0';
-            }
+            // Updates the string directly and frees the old string
+            contents_to_strings[i] = new_string;
+            free(old_string);
         }
-        // Updates the string directly and frees the old string
-        contents_to_strings[i] = new_string;
-        free(old_string);
+        else {
+            free(old_string);
+            contents_to_strings[i] = NULL;
+        }
+    }
+    if (malloc_fail) {
+        for (int i = 0; i < size; i++) {
+            free(contents_to_strings[i]);
+        }
+        return NULL;
     }
 
     // Inserts all of the strings into one huge string
     int result_size = target->row_count * target->col_count * new_string_size;
     result_size += target->row_count * 3 + 1; // | \n and \0
-    char *result = malloc(sizeof(char) * result_size);
+    char result[result_size];
 
     result[result_size - 1] = '\0';
 
@@ -276,7 +345,13 @@ char *matrix_to_string (struct matrix *target) {
         newline_index += (target->col_count * new_string_size) + 2;
         result[newline_index] = '\n';
     }
-    return result;
+
+    // Remember to free the array of strings
+    for (int i = 0; i < size; i++) {
+        free(contents_to_strings[i]);
+    }
+
+    return strdup(result);  // return NULL if malloc error
 }
 
 bool compare_matrices (struct matrix *target1, struct matrix *target2) {
@@ -297,29 +372,33 @@ bool compare_matrices (struct matrix *target1, struct matrix *target2) {
             double element2 = target2->contents[i][j];
             double difference = element1 - element2;
             
-            char str_difference[10];
-            sprintf(str_difference, "%f", difference);
+            char str_difference[100];
+            sprintf(str_difference, "%0.6f", difference);
             char str_zero[] = "0.000000";
             bool equal_check = true;
 
             if (str_difference[0] == '-') {
-                for (int i = 1; i < 9; i++) {
+                char current = str_difference[1];
+                for (int i = 1; current != '\0'; i++) {
                     if (str_difference[i] != str_zero[i - 1]) {
                         equal_check = false;
                     }
+                    current = str_difference[i + 1];
                 }
             }
             else {
-                for (int i = 0; i < 8; i++) {
+                char current = str_difference[0];
+                for (int i = 0; current != '\0'; i++) {
                     if (str_difference[i] != str_zero[i]) {
                         equal_check = false;
                     }
+                    current = str_difference[i + 1];
                 }
             }
 
             if (!equal_check) {
-                printf("\n%lf\n", difference);
-                printf("target1: element %lf --- target2: element %lf\n\n", target1->contents[i][j], target2->contents[i][j]);
+                //printf("\n%lf --- string: %s\n", difference, str_difference);
+                //printf("target1: element %lf --- target2: element %lf\n\n", target1->contents[i][j], target2->contents[i][j]);
                 return false;
             }
         }
