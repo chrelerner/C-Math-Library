@@ -25,20 +25,35 @@ struct matrix *create_matrix (int row_count, int col_count, double *contents, in
 
     // Checks if dimensions are acceptable
     if (!(row_count > 0 && col_count > 0)) {
-        printf("Dimensions %d %d unacceptable\n", row_count, col_count);
+        fprintf(
+            stderr,
+            "ERROR create_matrix(): Dimensions %d %d unacceptable\n",
+            row_count, col_count
+        );
         return NULL;
     }
 
     // Checks if the size of contents is acceptable
     if (element_count != (row_count * col_count)) {
-        printf("Size of contents %d unacceptable with dimensions %d %d\n", element_count, row_count, col_count);
+        fprintf(
+            stderr,
+            "ERROR create_matrix(): Size of contents %d unacceptable with dimensions %d %d\n",
+            element_count, row_count, col_count
+        );
+        return NULL;
+    }
+
+    if (contents == NULL) {
+        fprintf(
+            stderr,
+            "ERROR create_matrix(): contents cannot be NULL"
+        );
         return NULL;
     }
 
     // Defining the matrix
     struct matrix *result = (struct matrix *) malloc(sizeof(struct matrix));
     if (result == NULL) { // malloc error
-        printf("Malloc failure\n");
         return NULL;
     }
     result->row_count = row_count;
@@ -47,7 +62,6 @@ struct matrix *create_matrix (int row_count, int col_count, double *contents, in
     double **result_contents = (double **) malloc(sizeof(double *) * row_count);
     if (result_contents == NULL) { // malloc error
         free(result);
-        printf("Malloc failure\n");
         return NULL;
     }
     result->contents = result_contents;
@@ -67,7 +81,6 @@ struct matrix *create_matrix (int row_count, int col_count, double *contents, in
     }
     if (malloc_fail) {
         free_matrix(result);
-        printf("Malloc failure\n");
         return NULL;
     }
 
@@ -84,11 +97,24 @@ struct matrix *create_matrix (int row_count, int col_count, double *contents, in
 
 struct matrix *change_matrix_dimensions (struct matrix *target, int new_row_count, int new_col_count) {
 
+    if (target == NULL) {
+        fprintf(
+            stderr,
+            "ERROR change_matrix_dimensions(): target cannot be NULL"
+        );
+        return NULL;
+    }
+
     // Check if dimensions are acceptable
     int old_row_count = target->row_count;
     int old_col_count = target->col_count;
 
     if (old_row_count * old_col_count != new_row_count * new_col_count) {
+        fprintf(
+            stderr,
+            "ERROR change_matrix_dimensions(): new dimensions (%d %d) do not match old dimensions (%d %d)",
+            new_row_count, new_col_count, old_row_count, old_col_count
+        );
         return NULL;
     }
 
@@ -108,6 +134,14 @@ struct matrix *change_matrix_dimensions (struct matrix *target, int new_row_coun
 
 struct matrix *matrix_addition (struct matrix *target1, struct matrix *target2) {
 
+    if (target1 == NULL || target2 == NULL) {
+        fprintf(
+            stderr,
+            "ERROR matrix_addition(): targets cannot be NULL"
+        );
+        return NULL;
+    }
+
     // Checks that dimensions are acceptable
     int row1 = target1->row_count;
     int col1 = target1->col_count;
@@ -115,55 +149,35 @@ struct matrix *matrix_addition (struct matrix *target1, struct matrix *target2) 
     int col2 = target2->col_count;
 
     if (row1 != row2 || col1 != col2) {
+        fprintf(
+            stderr,
+            "ERROR matrix_addition(): target1 dim: %d %d not compatible with target2 dim: %d %d\n",
+            row1, col1, row2, col2
+        );
         return NULL;
     }
 
-    // Defining result matrix and dimensions
-    struct matrix *result = (struct matrix *) malloc(sizeof(struct matrix));
-    if (result == NULL) {
-        return NULL;
-    }
-    int row_count = target1->row_count;
-    int col_count = target1->col_count;
-    result->row_count = row_count;
-    result->col_count = col_count;
+    int size = row1 * col1;
+    double result_contents[size];
 
-    double **result_contents = (double **) malloc(sizeof(double *) * row_count);
-    if (result_contents == NULL) { // malloc error
-        free(result);
-        return NULL;
-    }
-    result->contents = result_contents;
-
-    // Preparing contents
-    bool malloc_fail = false;
-    for (int i = 0; i < row_count; i++) {
-        if (!malloc_fail) {
-            result->contents[i] = (double *) malloc(sizeof(double) * col_count);
-            if (result->contents[i] == NULL) {
-                malloc_fail = true;
-            }
-        }
-        else {
-            result->contents[i] = NULL;
+    // Performing addition
+    for (int i = 0; i < row1; i++) {
+        for (int j = 0; j < col1; j++) {
+            result_contents[(i * col1) + j] = target1->contents[i][j] + target2->contents[i][j];
         }
     }
-    if (malloc_fail) {
-        free_matrix(result);
-        printf("Malloc failure\n");
-        return NULL;
-    }
-
-    // Performing addition and returning successfully
-    for (int i = 0; i < row_count; i++) {
-        for (int j = 0; j < col_count; j++) {
-            result->contents[i][j] = target1->contents[i][j] + target2->contents[i][j];
-        }
-    }
-    return result;
+    return create_matrix(row1, col1, result_contents, size);
 }
 
 struct matrix *matrix_multiplication (struct matrix *target1, struct matrix *target2) {
+
+    if (target1 == NULL || target2 == NULL) {
+        fprintf(
+            stderr,
+            "ERROR matrix_multiplication(): targets cannot be NULL"
+        );
+        return NULL;
+    }
 
     // Checks that dimensions are acceptable
     int row1 = target1->row_count;
@@ -172,61 +186,42 @@ struct matrix *matrix_multiplication (struct matrix *target1, struct matrix *tar
     int col2 = target2->col_count;
 
     if (col1 != row2) {
+        fprintf(
+            stderr,
+            "ERROR matrix_multiplication(): target1 row_count (%d) must equal target2 col_count (%d)\n",
+            row1, col2
+        );
         return NULL;
     }
 
-    // Defining result matrix and dimensions
-    struct matrix *result = (struct matrix *) malloc(sizeof(struct matrix));
-    if (result == NULL) {
-        return NULL;
-    }
-    int row_count = target1->row_count;
-    int col_count = target2->col_count;
-    result->row_count = row_count;
-    result->col_count = col_count;
+    int size = row1 * col2;
+    double result_contents[size];
 
-    double **result_contents = (double **) malloc(sizeof(double *) * row_count);
-    if (result_contents == 0) { // malloc error
-        free(result);
-        return NULL;
-    }
-    result->contents = result_contents;
-
-    // Preparing contents
-    bool malloc_fail = false;
-    for (int i = 0; i < row_count; i++) {
-        if (!malloc_fail) {
-            result->contents[i] = (double *) malloc(sizeof(double) * col_count);
-            if (result->contents[i] == NULL) {
-                malloc_fail = true;
-            }
-        }
-        else {
-            result->contents[i] = NULL;
-        }
-    }
-    if (malloc_fail) {
-        free_matrix(result);
-        printf("Malloc failure\n");
-        return NULL;
-    }
-
-    // Performing matrix multiplication and returning successfully
-    for (int a = 0; a < target1->row_count; a++) { // Row vector
-        for (int b = 0; b < target2->col_count; b++) { // Column vector
+    // Performing matrix multiplication
+    for (int a = 0; a < row1; a++) { // Row vector
+        for (int b = 0; b < col2; b++) { // Column vector
 
             // Takes care of vector multiplication
             double sum = 0;
-            for (int c = 0; c < target1->col_count; c++) {
+            for (int c = 0; c < col1; c++) {
                 sum += target1->contents[a][c] * target2->contents[c][b];
             }
-            result->contents[a][b] = sum;
+            result_contents[(a * col2) + b] = sum;
         }
     }
-    return result;
+    return create_matrix(row1, col2, result_contents, size);
 }
 
 char *matrix_to_string (struct matrix *target) {
+
+    if (target == NULL) {
+        fprintf(
+            stderr,
+            "ERROR matrix_to_string: target cannot be NULL\n"
+        );
+        return NULL;
+    }
+
     // Converts all elements to strings
     int size = target->row_count * target->col_count;
     char *contents_to_strings[size]; // Contains all the string variants of the elements
@@ -355,6 +350,15 @@ char *matrix_to_string (struct matrix *target) {
 }
 
 bool compare_matrices (struct matrix *target1, struct matrix *target2) {
+
+    if (target1 == NULL || target2 == NULL) {
+        fprintf(
+            stderr,
+            "ERROR compare_matrices(): targets cannot be NULL"
+        );
+        return NULL; // might have to change this one
+    }
+
     // Compares dimensions
     int row1 = target1->row_count;
     int col1 = target1->col_count;
