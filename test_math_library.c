@@ -206,7 +206,7 @@ int test_compare_matrices () {
     printf("SUCCESS\n");
     free_matrix(test1);
 
-    // TEST 2: Mixed matrices, di: 3 4
+    // TEST 2: Mixed matrices, dim: 3 4
     printf("TEST 2: mixed matrices --- ");
     double test2_contents[] = {2, 0, -7.342135, 6.34, -1000.1232, 20.0, 400.34566, 1, 2, -111.0, 99.999999, -0.123456};
     int test2_contents_size = sizeof test2_contents / sizeof test2_contents[0];
@@ -278,7 +278,7 @@ int test_matrix_addition () {
 
     printf("\nTesting matrix_addition()\n\n");
 
-    // TEST matrix_addition(): test 1 all positive, dim: 4 5
+    // TEST 1: all positive, dim: 4 5
     printf("TEST 1: all positive --- ");
     double test1_contents_1[] = {
         1, 2, 3, 4, 5,
@@ -330,7 +330,7 @@ int test_matrix_addition () {
     }
     printf("SUCCESS\n");
 
-    // TEST matrix_addition(): test 2 all negative, dim: 4 5
+    // TEST 2: all negative, dim: 4 5
     printf("TEST 2: all negative --- ");
     double test2_contents_1[] = {
         -1, -2, -3, -4, -5, -6, -7, -8, -9, -10,
@@ -379,7 +379,7 @@ int test_matrix_addition () {
     }
     printf("SUCCESS\n");
 
-    // TEST matrix_addition(): test 3 mixed, dim: 2 3
+    // TEST 3: mixed, dim: 2 3
     printf("TEST 3: mixed --- ");
     double test3_contents_1[] = {7, 5.7, -3, 81.4, 10, -72};
     double test3_contents_2[] = {-5, 34.3, 7, 9.2, 1, 3};
@@ -652,7 +652,7 @@ int test_scalar_addition () {
 
     printf("\nTesting scalar_addition()\n\n");
 
-    // TEST scalar_addition(): test 1 all positive, dim: 4 5
+    // TEST 1: all positive, dim: 4 5
     printf("TEST 1: all positive --- ");
     double test1_contents[] = {
         1, 2, 3, 4, 5,
@@ -695,7 +695,7 @@ int test_scalar_addition () {
     }
     printf("SUCCESS\n");
 
-    // TEST scalar_addition(): test 2 all negative, dim: 4 5
+    // TEST 2: all negative, dim: 4 5
     printf("TEST 2: all negative --- ");
     double test2_contents[] = {
         -1, -2, -3, -4, -5,
@@ -738,7 +738,7 @@ int test_scalar_addition () {
     }
     printf("SUCCESS\n");
 
-    // TEST scalar_addition(): test 3 mixed, dim: 4 5
+    // TEST 3: mixed, dim: 4 5
     printf("TEST 3: mixed --- ");
     double test3_contents[] = {
         -1, -2, 3, -4, 5,
@@ -781,7 +781,7 @@ int test_scalar_addition () {
     }
     printf("SUCCESS\n");
 
-    // TEST scalar_addition(): test 4 target is NULL
+    // TEST 4: target is NULL
     printf("TEST 4: target is NULL --- ");
 
     struct matrix *test4_result_matrix = scalar_addition(NULL, 3);
@@ -798,7 +798,7 @@ int test_scalar_addition () {
 int test_scalar_multiplication () {
     printf("\nTesting scalar_multiplication()\n\n");
 
-    // TEST scalar_addition(): test 1 all positive, dim: 2 3
+    // TEST 1: all positive, dim: 2 3
     printf("TEST 1: all positive --- ");
     double test1_contents[] = {
         2, 1, 4,
@@ -837,7 +837,7 @@ int test_scalar_multiplication () {
     }
     printf("SUCCESS\n");
 
-    // TEST scalar_addition(): test 2 all negative, dim: 2 3
+    // TEST 2: all negative, dim: 2 3
     printf("TEST 2: all negative --- ");
     double test2_contents[] = {
         -2, -1, -4,
@@ -876,7 +876,7 @@ int test_scalar_multiplication () {
     }
     printf("SUCCESS\n");
 
-    // TEST scalar_addition(): test 3 mixed, dim: 2 3
+    // TEST 3: mixed, dim: 2 3
     printf("TEST 3: mixed --- ");
     double test3_contents[] = {
         -2, 1, -4,
@@ -915,7 +915,7 @@ int test_scalar_multiplication () {
     }
     printf("SUCCESS\n");
 
-    // TEST scalar_addition(): test 4 target is NULL
+    // TEST 4: target is NULL
     printf("TEST 4: target is NULL --- ");
 
     struct matrix *test4_result_matrix = scalar_multiplication(NULL, 3);
@@ -933,8 +933,8 @@ int test_change_matrix_dimensions () {
 
     printf("\nTesting change_matrix_dimensions()\n\n");
 
-    // Test 1
-    printf("TEST 1: dim: 3 4 to dim: 2 6 --- ");
+    // TEST 1: dim 3 4 to dim 2 6
+    printf("TEST 1: dim 3 4 to dim 2 6 --- ");
     double test1_contents[] = {
         1, 2, 3, 4,
         5, 6, 7, 8,
@@ -968,7 +968,7 @@ int test_change_matrix_dimensions () {
     }
     printf("SUCCESS\n");
 
-    // Test 2
+    // TEST 2: dim 2 6 to dim 4 3
     printf("TEST 2: dim: 2 6 to dim: 4 3 --- ");
     double test2_contents[] = {
         1, 2, 3, 4, 5, 6,
@@ -1002,7 +1002,7 @@ int test_change_matrix_dimensions () {
     }
     printf("SUCCESS\n");
 
-    // Test 3
+    // TEST 3: dim 5 7 to dim 35 1
     printf("TEST 3: dim: 5 7 to dim: 35 1 --- ");
     double test3_contents[] = {
         1, 2, 3, 4, 5, 6, 7,
@@ -1039,7 +1039,7 @@ int test_change_matrix_dimensions () {
     }
     printf("SUCCESS\n");
 
-    // Test 4
+    // TEST 4: incompatible dimensions
     printf("TEST 4: incompatible dimensions --- ");
     double test4_contents[] = {
         1, 2, 3, 4, 5,
@@ -1063,7 +1063,7 @@ int test_change_matrix_dimensions () {
     }
     printf("SUCCESS\n");
 
-    // TEST scalar_addition(): test 4 target is NULL
+    // TEST 5: target is NULL
     printf("TEST 5: target is NULL --- ");
 
     struct matrix *test5_result_matrix = change_matrix_dimensions(NULL, 3, 2);
@@ -1081,7 +1081,7 @@ int test_transpose_matrix () {
 
     printf("\nTesting transpose_matrix()\n\n");
 
-    // Test 1
+    // TEST 1: transpose 3 4
     printf("TEST 1: dim 3 4 to dim 4 3 --- ");
     double test1_contents[] = {
         1, 2, 3, 4,
@@ -1123,7 +1123,7 @@ int test_transpose_matrix () {
     }
     printf("SUCCESS\n");
 
-    // Test 2
+    // TEST 2: transpose 2 10
     printf("TEST 2: dim 2 10 to dim 10 2 --- ");
     double test2_contents[] = {
         4, 1, 6, 88, 3, 2, 77, 4, 9, 10,
@@ -1170,7 +1170,7 @@ int test_transpose_matrix () {
     }
     printf("SUCCESS\n");
 
-    // Test 3
+    // TEST 3: transpose 1 1
     printf("TEST 3: dim 1 1 to dim 1 1 --- ");
     double test3_contents[] = {
         987
@@ -1199,7 +1199,7 @@ int test_transpose_matrix () {
     }
     printf("SUCCESS\n");
 
-    // TEST scalar_addition(): test 4 target is NULL
+    // TEST 4: target is NULL
     printf("TEST 4: target is NULL --- ");
 
     struct matrix *test4_result_matrix = transpose_matrix(NULL);
