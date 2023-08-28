@@ -7,6 +7,9 @@ int test_matrix_addition ();
 int test_matrix_multiplication ();
 int test_scalar_addition ();
 int test_scalar_multiplication ();
+int test_change_matrix_dimensions ();
+int test_transpose_matrix ();
+int test_matrix_to_string ();
 
 int main (int argc, char *argv[]) {
 
@@ -23,6 +26,22 @@ int main (int argc, char *argv[]) {
     }
 
     if (test_matrix_multiplication()) {
+        return 1;
+    }
+
+    if (test_scalar_addition()) {
+        return 1;
+    }
+
+    if (test_scalar_multiplication()) {
+        return 1;
+    }
+
+    if (test_change_matrix_dimensions()) {
+        return 1;
+    }
+
+    if (test_transpose_matrix()) {
         return 1;
     }
 
@@ -626,13 +645,570 @@ int test_matrix_multiplication () {
     }
     printf("SUCCESS\n\n");
 
-    return 1;
+    return 0;
 }
 
 int test_scalar_addition () {
-    return 1;
+
+    printf("\nTesting scalar_addition()\n\n");
+
+    // TEST scalar_addition(): test 1 all positive, dim: 4 5
+    printf("TEST 1: all positive --- ");
+    double test1_contents[] = {
+        1, 2, 3, 4, 5,
+        6, 7, 8, 9, 10,
+        11, 12, 13, 14, 15,
+        16, 17, 18, 19, 20
+    };
+    double test1_contents_expected[] = {
+        4, 5, 6, 7, 8,
+        9, 10, 11, 12, 13,
+        14, 15, 16, 17, 18,
+        19, 20, 21, 22, 23
+    };
+    int test1_contents_size = sizeof test1_contents / sizeof test1_contents[0];
+    int test1_contents_expected_size = sizeof test1_contents_expected / sizeof test1_contents_expected[0];
+
+    struct matrix *test1 = create_matrix(4, 5, test1_contents, test1_contents_size);
+    struct matrix *test1_expected = create_matrix(4, 5, test1_contents_expected, test1_contents_expected_size);
+    if (test1 == NULL || test1_expected == NULL) {
+        free_matrix(test1);
+        free_matrix(test1_expected);
+        return 1;
+    }
+
+    struct matrix *test1_result_matrix = scalar_addition(test1, 3);
+    if (test1_result_matrix == NULL) {
+        free_matrix(test1);
+        free_matrix(test1_expected);
+        free_matrix(test1_result_matrix);
+        return 1;
+    }
+    bool test1_result = compare_matrices(test1_expected, test1_result_matrix);
+    free_matrix(test1);
+    free_matrix(test1_expected);
+    free_matrix(test1_result_matrix);
+
+    if (test1_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // TEST scalar_addition(): test 2 all negative, dim: 4 5
+    printf("TEST 2: all negative --- ");
+    double test2_contents[] = {
+        -1, -2, -3, -4, -5,
+        -6, -7, -8, -9, -10,
+        -11, -12, -13, -14, -15,
+        -16, -17, -18, -19, -20
+    };
+    double test2_contents_expected[] = {
+        2, 1, 0, -1, -2,
+        -3, -4, -5, -6, -7,
+        -8, -9, -10, -11, -12,
+        -13, -14, -15, -16, -17
+    };
+    int test2_contents_size = sizeof test2_contents / sizeof test2_contents[0];
+    int test2_contents_expected_size = sizeof test2_contents_expected / sizeof test2_contents_expected[0];
+
+    struct matrix *test2 = create_matrix(4, 5, test2_contents, test2_contents_size);
+    struct matrix *test2_expected = create_matrix(4, 5, test2_contents_expected, test2_contents_expected_size);
+    if (test2 == NULL || test2_expected == NULL) {
+        free_matrix(test2);
+        free_matrix(test2_expected);
+        return 1;
+    }
+
+    struct matrix *test2_result_matrix = scalar_addition(test2, 3);
+    if (test2_result_matrix == NULL) {
+        free_matrix(test2);
+        free_matrix(test2_expected);
+        free_matrix(test2_result_matrix);
+        return 1;
+    }
+    bool test2_result = compare_matrices(test2_expected, test2_result_matrix);
+    free_matrix(test2);
+    free_matrix(test2_expected);
+    free_matrix(test2_result_matrix);
+
+    if (test2_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // TEST scalar_addition(): test 3 mixed, dim: 4 5
+    printf("TEST 3: mixed --- ");
+    double test3_contents[] = {
+        -1, -2, 3, -4, 5,
+        -6, 7, -8, 9, -10,
+        11, -12, -13, -14, 15,
+        16, 17, 18, -19, -20
+    };
+    double test3_contents_expected[] = {
+        2, 1, 6, -1, 8,
+        -3, 10, -5, 12, -7,
+        14, -9, -10, -11, 18,
+        19, 20, 21, -16, -17
+    };
+    int test3_contents_size = sizeof test3_contents / sizeof test3_contents[0];
+    int test3_contents_expected_size = sizeof test3_contents_expected / sizeof test3_contents_expected[0];
+
+    struct matrix *test3 = create_matrix(4, 5, test3_contents, test3_contents_size);
+    struct matrix *test3_expected = create_matrix(4, 5, test3_contents_expected, test3_contents_expected_size);
+    if (test3 == NULL || test3_expected == NULL) {
+        free_matrix(test3);
+        free_matrix(test3_expected);
+        return 1;
+    }
+
+    struct matrix *test3_result_matrix = scalar_addition(test3, 3);
+    if (test3_result_matrix == NULL) {
+        free_matrix(test3);
+        free_matrix(test3_expected);
+        free_matrix(test3_result_matrix);
+        return 1;
+    }
+    bool test3_result = compare_matrices(test3_expected, test3_result_matrix);
+    free_matrix(test3);
+    free_matrix(test3_expected);
+    free_matrix(test3_result_matrix);
+
+    if (test3_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // TEST scalar_addition(): test 4 target is NULL
+    printf("TEST 4: target is NULL --- ");
+
+    struct matrix *test4_result_matrix = scalar_addition(NULL, 3);
+
+    if (test4_result_matrix != NULL) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n\n");
+
+    return 0;
 }
 
 int test_scalar_multiplication () {
-    return 1;
+    printf("\nTesting scalar_multiplication()\n\n");
+
+    // TEST scalar_addition(): test 1 all positive, dim: 2 3
+    printf("TEST 1: all positive --- ");
+    double test1_contents[] = {
+        2, 1, 4,
+        7, 20, 1,
+    };
+    double test1_contents_expected[] = {
+        6, 3, 12,
+        21, 60, 3
+    };
+    int test1_contents_size = sizeof test1_contents / sizeof test1_contents[0];
+    int test1_contents_expected_size = sizeof test1_contents_expected / sizeof test1_contents_expected[0];
+
+    struct matrix *test1 = create_matrix(2, 3, test1_contents, test1_contents_size);
+    struct matrix *test1_expected = create_matrix(2, 3, test1_contents_expected, test1_contents_expected_size);
+    if (test1 == NULL || test1_expected == NULL) {
+        free_matrix(test1);
+        free_matrix(test1_expected);
+        return 1;
+    }
+
+    struct matrix *test1_result_matrix = scalar_multiplication(test1, 3);
+    if (test1_result_matrix == NULL) {
+        free_matrix(test1);
+        free_matrix(test1_expected);
+        free_matrix(test1_result_matrix);
+        return 1;
+    }
+    bool test1_result = compare_matrices(test1_expected, test1_result_matrix);
+    free_matrix(test1);
+    free_matrix(test1_expected);
+    free_matrix(test1_result_matrix);
+
+    if (test1_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // TEST scalar_addition(): test 2 all negative, dim: 2 3
+    printf("TEST 2: all negative --- ");
+    double test2_contents[] = {
+        -2, -1, -4,
+        -7, -20, -1,
+    };
+    double test2_contents_expected[] = {
+        -6, -3, -12,
+        -21, -60, -3
+    };
+    int test2_contents_size = sizeof test2_contents / sizeof test2_contents[0];
+    int test2_contents_expected_size = sizeof test2_contents_expected / sizeof test2_contents_expected[0];
+
+    struct matrix *test2 = create_matrix(2, 3, test2_contents, test2_contents_size);
+    struct matrix *test2_expected = create_matrix(2, 3, test2_contents_expected, test2_contents_expected_size);
+    if (test2 == NULL || test2_expected == NULL) {
+        free_matrix(test2);
+        free_matrix(test2_expected);
+        return 1;
+    }
+
+    struct matrix *test2_result_matrix = scalar_multiplication(test2, 3);
+    if (test2_result_matrix == NULL) {
+        free_matrix(test2);
+        free_matrix(test2_expected);
+        free_matrix(test2_result_matrix);
+        return 1;
+    }
+    bool test2_result = compare_matrices(test2_expected, test2_result_matrix);
+    free_matrix(test2);
+    free_matrix(test2_expected);
+    free_matrix(test2_result_matrix);
+
+    if (test2_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // TEST scalar_addition(): test 3 mixed, dim: 2 3
+    printf("TEST 3: mixed --- ");
+    double test3_contents[] = {
+        -2, 1, -4,
+        7, 20, -1,
+    };
+    double test3_contents_expected[] = {
+        -6, 3, -12,
+        21, 60, -3
+    };
+    int test3_contents_size = sizeof test3_contents / sizeof test3_contents[0];
+    int test3_contents_expected_size = sizeof test3_contents_expected / sizeof test3_contents_expected[0];
+
+    struct matrix *test3 = create_matrix(2, 3, test3_contents, test3_contents_size);
+    struct matrix *test3_expected = create_matrix(2, 3, test3_contents_expected, test3_contents_expected_size);
+    if (test3 == NULL || test3_expected == NULL) {
+        free_matrix(test3);
+        free_matrix(test3_expected);
+        return 1;
+    }
+
+    struct matrix *test3_result_matrix = scalar_multiplication(test3, 3);
+    if (test3_result_matrix == NULL) {
+        free_matrix(test3);
+        free_matrix(test3_expected);
+        free_matrix(test3_result_matrix);
+        return 1;
+    }
+    bool test3_result = compare_matrices(test3_expected, test3_result_matrix);
+    free_matrix(test3);
+    free_matrix(test3_expected);
+    free_matrix(test3_result_matrix);
+
+    if (test3_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // TEST scalar_addition(): test 4 target is NULL
+    printf("TEST 4: target is NULL --- ");
+
+    struct matrix *test4_result_matrix = scalar_multiplication(NULL, 3);
+
+    if (test4_result_matrix != NULL) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n\n");
+
+    return 0;
+}
+
+int test_change_matrix_dimensions () {
+
+    printf("\nTesting change_matrix_dimensions()\n\n");
+
+    // Test 1
+    printf("TEST 1: dim: 3 4 to dim: 2 6 --- ");
+    double test1_contents[] = {
+        1, 2, 3, 4,
+        5, 6, 7, 8,
+        9, 10, 11, 12
+    };
+    int test1_contents_size = sizeof test1_contents / sizeof test1_contents[0];
+
+    struct matrix *test1 = create_matrix(3, 4, test1_contents, test1_contents_size);
+    struct matrix *test1_expected = create_matrix(2, 6, test1_contents, test1_contents_size);
+    if (test1 == NULL || test1_expected == NULL) {
+        free_matrix(test1);
+        free_matrix(test1_expected);
+        return 1;
+    }
+
+    struct matrix *test1_result_matrix = change_matrix_dimensions(test1, 2, 6);
+    if (test1_result_matrix == NULL) {
+        free_matrix(test1);
+        free_matrix(test1_expected);
+        free_matrix(test1_result_matrix);
+        return 1;
+    }
+    bool test1_result = compare_matrices(test1_expected, test1_result_matrix);
+    free_matrix(test1);
+    free_matrix(test1_expected);
+    free_matrix(test1_result_matrix);
+
+    if (test1_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // Test 2
+    printf("TEST 2: dim: 2 6 to dim: 4 3 --- ");
+    double test2_contents[] = {
+        1, 2, 3, 4, 5, 6,
+        7, 8, 9, 10, 11, 12
+    };
+    int test2_contents_size = sizeof test2_contents / sizeof test2_contents[0];
+
+    struct matrix *test2 = create_matrix(2, 6, test2_contents, test2_contents_size);
+    struct matrix *test2_expected = create_matrix(4, 3, test2_contents, test2_contents_size);
+    if (test2 == NULL || test2_expected == NULL) {
+        free_matrix(test2);
+        free_matrix(test2_expected);
+        return 1;
+    }
+
+    struct matrix *test2_result_matrix = change_matrix_dimensions(test2, 4, 3);
+    if (test2_result_matrix == NULL) {
+        free_matrix(test2);
+        free_matrix(test2_expected);
+        free_matrix(test2_result_matrix);
+        return 1;
+    }
+    bool test2_result = compare_matrices(test2_expected, test2_result_matrix);
+    free_matrix(test2);
+    free_matrix(test2_expected);
+    free_matrix(test2_result_matrix);
+
+    if (test2_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // Test 3
+    printf("TEST 3: dim: 5 7 to dim: 35 1 --- ");
+    double test3_contents[] = {
+        1, 2, 3, 4, 5, 6, 7,
+        8, 9, 10, 11, 12, 13, 14,
+        15, 16, 17, 18, 19, 20, 21,
+        22, 23, 24, 25, 26, 27, 28,
+        29, 30, 31, 32, 33, 34, 35
+    };
+    int test3_contents_size = sizeof test3_contents / sizeof test3_contents[0];
+
+    struct matrix *test3 = create_matrix(5, 7, test3_contents, test3_contents_size);
+    struct matrix *test3_expected = create_matrix(35, 1, test3_contents, test3_contents_size);
+    if (test3 == NULL || test3_expected == NULL) {
+        free_matrix(test3);
+        free_matrix(test3_expected);
+        return 1;
+    }
+
+    struct matrix *test3_result_matrix = change_matrix_dimensions(test3, 35, 1);
+    if (test3_result_matrix == NULL) {
+        free_matrix(test3);
+        free_matrix(test3_expected);
+        free_matrix(test3_result_matrix);
+        return 1;
+    }
+    bool test3_result = compare_matrices(test3_expected, test3_result_matrix);
+    free_matrix(test3);
+    free_matrix(test3_expected);
+    free_matrix(test3_result_matrix);
+
+    if (test3_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // Test 4
+    printf("TEST 4: incompatible dimensions --- ");
+    double test4_contents[] = {
+        1, 2, 3, 4, 5,
+        6, 7, 8, 9, 10,
+        11, 12, 13, 14, 15
+    };
+    int test4_contents_size = sizeof test4_contents / sizeof test4_contents[0];
+
+    struct matrix *test4 = create_matrix(3, 5, test4_contents, test4_contents_size);
+    if (test4 == NULL) {
+        free_matrix(test4);
+        return 1;
+    }
+
+    struct matrix *test4_result_matrix = change_matrix_dimensions(test4, 4, 2);
+    free_matrix(test4);
+
+    if (test4_result_matrix != NULL) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // TEST scalar_addition(): test 4 target is NULL
+    printf("TEST 5: target is NULL --- ");
+
+    struct matrix *test5_result_matrix = change_matrix_dimensions(NULL, 3, 2);
+
+    if (test5_result_matrix != NULL) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n\n");
+
+    return 0;
+}
+
+int test_transpose_matrix () {
+
+    printf("\nTesting transpose_matrix()\n\n");
+
+    // Test 1
+    printf("TEST 1: dim 3 4 to dim 4 3 --- ");
+    double test1_contents[] = {
+        1, 2, 3, 4,
+        5, 6, 7, 8,
+        9, 10, 11, 12
+    };
+    double test1_contents_expected[] = {
+        1, 5, 9,
+        2, 6, 10,
+        3, 7, 11,
+        4, 8, 12
+    };
+    int test1_contents_size = sizeof test1_contents / sizeof test1_contents[0];
+    int test1_contents_expected_size = sizeof test1_contents_expected / sizeof test1_contents_expected[0];
+
+    struct matrix *test1 = create_matrix(3, 4, test1_contents, test1_contents_size);
+    struct matrix *test1_expected = create_matrix(4, 3, test1_contents_expected, test1_contents_expected_size);
+    if (test1 == NULL || test1_expected == NULL) {
+        free_matrix(test1);
+        free_matrix(test1_expected);
+        return 1;
+    }
+
+    struct matrix *test1_result_matrix = transpose_matrix(test1);
+    if (test1_result_matrix == NULL) {
+        free_matrix(test1);
+        free_matrix(test1_expected);
+        free_matrix(test1_result_matrix);
+        return 1;
+    }
+    bool test1_result = compare_matrices(test1_expected, test1_result_matrix);
+    free_matrix(test1);
+    free_matrix(test1_expected);
+    free_matrix(test1_result_matrix);
+
+    if (test1_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // Test 2
+    printf("TEST 2: dim 2 10 to dim 10 2 --- ");
+    double test2_contents[] = {
+        4, 1, 6, 88, 3, 2, 77, 4, 9, 10,
+        4, 4, 9, 6, 3, 66, 3, 55, 323, 7
+    };
+    double test2_contents_expected[] = {
+        4, 4,
+        1, 4,
+        6, 9,
+        88, 6,
+        3, 3,
+        2, 66,
+        77, 3,
+        4, 55,
+        9, 323,
+        10, 7
+    };
+    int test2_contents_size = sizeof test2_contents / sizeof test2_contents[0];
+    int test2_contents_expected_size = sizeof test2_contents_expected / sizeof test2_contents_expected[0];
+
+    struct matrix *test2 = create_matrix(2, 10, test2_contents, test2_contents_size);
+    struct matrix *test2_expected = create_matrix(10, 2, test2_contents_expected, test2_contents_expected_size);
+    if (test2 == NULL || test2_expected == NULL) {
+        free_matrix(test2);
+        free_matrix(test2_expected);
+        return 1;
+    }
+
+    struct matrix *test2_result_matrix = transpose_matrix(test2);
+    if (test2_result_matrix == NULL) {
+        free_matrix(test2);
+        free_matrix(test2_expected);
+        free_matrix(test2_result_matrix);
+        return 1;
+    }
+    bool test2_result = compare_matrices(test2_expected, test2_result_matrix);
+    free_matrix(test2);
+    free_matrix(test2_expected);
+    free_matrix(test2_result_matrix);
+
+    if (test2_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // Test 3
+    printf("TEST 3: dim 1 1 to dim 1 1 --- ");
+    double test3_contents[] = {
+        987
+    };
+    int test3_contents_size = sizeof test3_contents / sizeof test3_contents[0];
+
+    struct matrix *test3 = create_matrix(1, 1, test3_contents, test3_contents_size);
+    if (test3 == NULL) {
+        free_matrix(test3);
+        return 1;
+    }
+
+    struct matrix *test3_result_matrix = transpose_matrix(test3);
+    if (test3_result_matrix == NULL) {
+        free_matrix(test3);
+        free_matrix(test3_result_matrix);
+        return 1;
+    }
+    bool test3_result = compare_matrices(test3, test3_result_matrix);
+    free_matrix(test3);
+    free_matrix(test3_result_matrix);
+
+    if (test3_result == false) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n");
+
+    // TEST scalar_addition(): test 4 target is NULL
+    printf("TEST 4: target is NULL --- ");
+
+    struct matrix *test4_result_matrix = transpose_matrix(NULL);
+
+    if (test4_result_matrix != NULL) {
+        printf("FAILURE\n");
+        return 1;
+    }
+    printf("SUCCESS\n\n");
+
+    return 0;
 }
