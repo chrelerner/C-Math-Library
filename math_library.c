@@ -73,7 +73,7 @@ struct matrix *create_matrix (int row_count, int col_count, double *contents, in
     if (contents == NULL) {
         fprintf(
             stderr,
-            "ERROR create_matrix(): contents cannot be NULL"
+            "ERROR create_matrix(): contents cannot be NULL\n"
         );
         return NULL;
     }
@@ -143,7 +143,7 @@ struct matrix *change_matrix_dimensions (struct matrix *target, int new_row_coun
     if (target == NULL) {
         fprintf(
             stderr,
-            "ERROR change_matrix_dimensions(): target cannot be NULL"
+            "ERROR change_matrix_dimensions(): target cannot be NULL\n"
         );
         return NULL;
     }
@@ -154,7 +154,7 @@ struct matrix *change_matrix_dimensions (struct matrix *target, int new_row_coun
     if (old_row_count * old_col_count != new_row_count * new_col_count) {
         fprintf(
             stderr,
-            "ERROR change_matrix_dimensions(): new dimensions (%d %d) do not match old dimensions (%d %d)",
+            "ERROR change_matrix_dimensions(): new dimensions (%d %d) do not match old dimensions (%d %d)\n",
             new_row_count, new_col_count, old_row_count, old_col_count
         );
         return NULL;
@@ -167,6 +167,48 @@ struct matrix *change_matrix_dimensions (struct matrix *target, int new_row_coun
     for (int i = 0; i < target->row_count; i++) {
         for (int j = 0; j < target->col_count; j++) {
             contents[j + (i * target->col_count)] = target->contents[i][j];
+        }
+    }
+    return create_matrix(new_row_count, new_col_count, contents, size);
+}
+
+
+struct matrix *transpose_matrix (struct matrix *target) {
+    /********************************************************************************
+    Transposes the matrix. Must be freed.
+
+    If the size of the matrix is one, a dynamically allocated copy of the
+    target will be returned.
+    This functions does not free the old matrix.
+
+    Input parameters:
+        - the target matrix
+        - new row amount
+        - new column amount
+    Return value:
+        - If successfull with size 1: a copy of the input target
+        - If successfull with size > 1: new and updated struct matrix *
+        - Malloc error: NULL
+        - Parameter error: NULL
+    *********************************************************************************/
+
+    if (target == NULL) {
+        fprintf(
+            stderr,
+            "ERROR transpose_matrix(): target cannot be NULL\n"
+        );
+        return NULL;
+    }
+
+    // Creating a one dimensional array representation of the contents
+    int size = target->row_count * target->col_count;
+    int new_row_count = target->col_count;
+    int new_col_count = target->row_count;
+    double contents[size];
+
+    for (int i = 0; i < target->row_count; i++) {
+        for (int j = 0; j < target->col_count; j++) {
+            contents[i + (j * target->row_count)] = target->contents[i][j];
         }
     }
     return create_matrix(new_row_count, new_col_count, contents, size);
@@ -189,7 +231,7 @@ struct matrix *matrix_addition (struct matrix *target1, struct matrix *target2) 
     if (target1 == NULL || target2 == NULL) {
         fprintf(
             stderr,
-            "ERROR matrix_addition(): targets cannot be NULL"
+            "ERROR matrix_addition(): targets cannot be NULL\n"
         );
         return NULL;
     }
@@ -220,6 +262,41 @@ struct matrix *matrix_addition (struct matrix *target1, struct matrix *target2) 
     return create_matrix(row1, col1, result_contents, size);
 }
 
+struct matrix *scalar_addition (struct matrix *target, double scalar) {
+    /********************************************************************************
+    Adds a scalar value to all the elements of a matrix. Result must be freed.
+
+    Input parameters:
+        - the target matrix
+        - the scalar
+    Return value:
+        - If successfull: new struct matrix *
+        - Malloc error: NULL
+        - Parameter error: NULL
+    *********************************************************************************/
+
+    if (target == NULL) {
+        fprintf(
+            stderr,
+            "ERROR scalar_addition(): target cannot be NULL\n"
+        );
+        return NULL;
+    }
+
+    int row1 = target->row_count;
+    int col1 = target->col_count;
+
+    // Performing addition
+    int size = row1 * col1;
+    double result_contents[size];
+
+    for (int i = 0; i < row1; i++) {
+        for (int j = 0; j < col1; j++) {
+            result_contents[(i * col1) + j] = target->contents[i][j] + scalar;
+        }
+    }
+    return create_matrix(row1, col1, result_contents, size);
+}
 
 struct matrix *matrix_multiplication (struct matrix *target1, struct matrix *target2) {
     /********************************************************************************
@@ -248,7 +325,7 @@ struct matrix *matrix_multiplication (struct matrix *target1, struct matrix *tar
     if (target1 == NULL || target2 == NULL) {
         fprintf(
             stderr,
-            "ERROR matrix_multiplication(): targets cannot be NULL"
+            "ERROR matrix_multiplication(): targets cannot be NULL\n"
         );
         return NULL;
     }
@@ -285,6 +362,41 @@ struct matrix *matrix_multiplication (struct matrix *target1, struct matrix *tar
     return create_matrix(row1, col2, result_contents, size);
 }
 
+struct matrix *scalar_multiplication (struct matrix *target, double scalar) {
+    /********************************************************************************
+    Multiplies all the elements of a matrix with a scalar value. Result must be freed.
+
+    Input parameters:
+        - the target matrix
+        - the scalar
+    Return value:
+        - If successfull: new struct matrix *
+        - Malloc error: NULL
+        - Parameter error: NULL
+    *********************************************************************************/
+
+    if (target == NULL) {
+        fprintf(
+            stderr,
+            "ERROR scalar_multiplication(): target cannot be NULL\n"
+        );
+        return NULL;
+    }
+
+    int row1 = target->row_count;
+    int col1 = target->col_count;
+
+    // Performing addition
+    int size = row1 * col1;
+    double result_contents[size];
+
+    for (int i = 0; i < row1; i++) {
+        for (int j = 0; j < col1; j++) {
+            result_contents[(i * col1) + j] = target->contents[i][j] * scalar;
+        }
+    }
+    return create_matrix(row1, col1, result_contents, size);
+}
 
 char *matrix_to_string (struct matrix *target) {
     /**************************************************************
@@ -464,7 +576,7 @@ bool compare_matrices (struct matrix *target1, struct matrix *target2) {
     if (target1 == NULL || target2 == NULL) {
         fprintf(
             stderr,
-            "ERROR compare_matrices(): targets cannot be NULL"
+            "ERROR compare_matrices(): targets cannot be NULL\n"
         );
         return NULL; // might have to change this one
     }
